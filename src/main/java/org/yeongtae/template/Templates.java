@@ -1,0 +1,90 @@
+package org.yeongtae.template;
+
+import org.yeongtae.game.constants.SubMenu;
+import org.yeongtae.global.Menu;
+import org.yeongtae.global.constants.MainMenu;
+import org.yeongtae.template.game.GameTpl;
+import org.yeongtae.template.game.RankTpl;
+import org.yeongtae.template.main.MainTpl;
+import org.yeongtae.template.member.JoinTpl;
+import org.yeongtae.template.member.LoginTpl;
+import org.yeongtae.template.member.MypageTpl;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
+public class Templates {
+    private static Templates instance;
+    private Map<Menu, Template> tpls;
+
+    private Templates() {
+        tpls = new HashMap<>();
+    }
+
+    public static Templates getInstance() {
+        if (instance == null) {
+            instance = new Templates();
+        }
+
+        return instance;
+    }
+
+    public void render(Menu menu) {
+        render(menu, null);
+    }
+
+    public void render(Menu menu, Supplier<String> hook) {
+
+        System.out.println(find(menu, hook).getTpl());
+    }
+
+    public Template find(Menu menu, Supplier<String> hook) {
+        Template tpl = tpls.get(menu);
+        if (tpl != null) {
+            return tpl;
+        }
+        if (menu instanceof SubMenu) {
+            SubMenu subMenu = (SubMenu) menu;
+            switch(subMenu) {
+                case ALONE:
+                case TOGETHER:
+                case RANKING: tpl = new RankTpl(); break;
+            }
+        } else {
+            MainMenu mainMenu = (MainMenu)menu;
+            switch (mainMenu) {
+                case JOIN:
+                    tpl = new JoinTpl();
+                    break;
+                case LOGIN:
+                    tpl = new LoginTpl();
+                    break;
+                case MYPAGE:
+                    tpl = new MypageTpl();
+                    break;
+                case GAME:
+                    tpl = new GameTpl();
+                    break;
+                default:
+                    tpl = new MainTpl();
+            }
+        }
+
+        if (hook != null) {
+            tpl.addHook(hook);
+        }
+
+        tpls.put(menu, tpl);
+
+        return tpl;
+    }
+
+    public String line() {
+        return "-----------------------------------\n";
+    }
+
+    public String doubleLine() {
+        return "===================================\n";
+    }
+}
